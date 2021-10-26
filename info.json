@@ -1,0 +1,17 @@
+{
+"name":"AssemblerUPSGrade-SEFork",
+"author":"Kingdud, bjerkles",
+"version":"0.1.0",
+"factorio_version":"1.1",
+"title":"Assembler UPSGrade - SE Fork",
+"homepage":"",
+"dependencies": [
+	"base >= 0.17",
+	"space-exploration >= 0.5.77",
+	"?NuclearRebalance >= 1.0.0",
+	"?EnhancedGridEnergyStores >= 1.0.2",
+	"?GatlingPulseLaser >= 1.0.0",
+	"! AssemblerUPSGrade"
+	],
+"description":"Space Exploration friendly version. Provides Application Specific factories to reduce the entity count on megabase maps. Compression ratio is configurable. IE: you can decide to have each building be equivilant to 25 assemblers, or 1000. The recipes/costs/results/size/pollution will all scale accordingly."
+}
