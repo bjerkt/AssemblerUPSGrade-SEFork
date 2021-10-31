@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.2
+  Changes:
+    - Marked as incompatible with Krastorio 2, pending fix.
+---------------------------------------------------------------------------------------------------
 Version: 0.1.1
   Bugfix:
     - Stopped breaking game engine by trying to make massive buildings.
