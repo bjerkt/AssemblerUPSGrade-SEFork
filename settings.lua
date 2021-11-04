@@ -134,8 +134,8 @@ data:extend{
     type = "string-setting",
     name = "rocketfuel-asif-recipe-variant",
     setting_type = "startup",
-    default_value = "se-low-density-structure-beryllium",
-    allowed_values   = {"low-density-structure","se-low-density-structure-beryllium"},
+    default_value = "rocket-fuel",
+    allowed_values   = {"rocket-fuel","se-vulcanite-rocket-fuel"},
     order = "h1"
   },
   {

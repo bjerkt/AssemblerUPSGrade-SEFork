@@ -86,6 +86,14 @@ base_recipes =
 plastic_base_recipes = {"coal", "sulfur", "petroleum-gas", "light-oil", "heavy-oil", "water" }
 FLUID_NAMES = {"sulfuric-acid", "petroleum-gas", "light-oil", "heavy-oil", "water" }
 
+RECIPE_VARIANT_OVERRIDE = {
+	"electronic-circuit" = settings.startup["greencircuit-asif-recipe-variant"].value,
+	"processing-unit" = settings.startup["bluecircuit-asif-recipe-variant"].value,
+	"low-density-structure" = settings.startup["lowdensitystructure-asif-recipe-variant"].value,
+	"se-heat-shielding" = settings.startup["heatshielding-asif-recipe-variant"].value,
+	"rocket-fuel" = settings.startup["rocketfuel-asif-recipe-variant"].value
+}
+
 --replicate changes here to control.lua!
 ORDER_MAP = {
 	["gc-asif"] = "a",
