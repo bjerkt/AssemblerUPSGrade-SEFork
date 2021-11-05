@@ -1,4 +1,4 @@
-require("prototypes.constants")
+local CONST = require("prototypes.constants")
 require("prototypes.functions")
 require("prototypes.oil-functions")
 

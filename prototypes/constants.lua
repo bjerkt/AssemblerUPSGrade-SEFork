@@ -52,17 +52,17 @@ CONST.TECH_DETAILS = {
 	--Oil is handled on its own since it unlocks multiple recipes.
 	["oil-asif"] = { cost = 4000000, prereqs = {"asif"} },
 }
--- Names of the desired recipes for each item. Important distinction, as there are multiple recipes for certain items
+-- Map of ASIF name to desired item output
 CONST.ITEM_LIST = {
 	["arty-shell-asif"] = "artillery-shell",
-	["gc-asif"] = "electronic-circuit-stone",
+	["gc-asif"] = "electronic-circuit",
 	["rc-asif"] = "advanced-circuit",
 	["bc-asif"] = "processing-unit",
-	["se-bc-asif"] = "se-processing-unit-holmium",
+	--["se-bc-asif"] = "se-processing-unit-holmium",
 	["lds-asif"] = "low-density-structure",
-	["se-lds-asif"] = "se-low-density-structure-beryllium",
+	--["se-lds-asif"] = "se-low-density-structure-beryllium",
 	["se-hs-asif"] = "se-heat-shielding",
-	["se-hsi-asif"] = "se-heat-shielding-iridium",
+	--["se-hsi-asif"] = "se-heat-shielding-iridium",
 	["eng-asif"] = "engine-unit",
 	["pla-asif"] = "plastic-bar",
 	--["rf-asif"] = "rocket-fuel",
@@ -82,34 +82,49 @@ CONST.RECIPE_MAP = {
 -- Root ingredients; we don't need to recurse past these
 CONST.BASE_ITEMS = 
 {
-	"copper-plate",
-	"iron-plate",
-	"steel-plate",
-	"plastic-bar",
-	"sulfuric-acid",
-	"solid-fuel",
-	"petroleum-gas",
-	"heavy-oil",
-	"light-oil",
-	"sulfur",
-	"coal",
-	"water",
-	"wood",
-	"stone",
-	"stone-brick",
-	"glass",
-	"sand",
-	"se-vitamelange-extract",
-	"se-beryllium-ingot",
-	"se-holmium-ingot",
-	"se-iridium-ingot",
-	"se-naquium-ingot",
-	"se-cryonite-rod",
-	"se-vulcanite-block"
+	"copper-plate" = true,
+	"iron-plate" = true,
+	"steel-plate" = true,
+	"plastic-bar" = true,
+	"sulfuric-acid" = true,
+	"solid-fuel" = true,
+	"petroleum-gas" = true,
+	"heavy-oil" = true,
+	"light-oil" = true,
+	"sulfur" = true,
+	"coal" = true,
+	"water" = true,
+	"wood" = true,
+	"stone" = true,
+	"stone-brick" = true,
+	"glass" = true,
+	"sand" = true,
+	"se-vitamelange-extract" = true,
+	"se-beryllium-ingot" = true,
+	"se-holmium-ingot" = true,
+	"se-iridium-ingot" = true,
+	"se-naquium-ingot" = true,
+	"se-cryonite-rod" = true,
+	"se-vulcanite-block" = true
 
 }
-CONST.PLASTIC_BASE_RECIPES = {"coal", "sulfur", "petroleum-gas", "light-oil", "heavy-oil", "water" }
-CONST.FLUID_NAMES = {"sulfuric-acid", "petroleum-gas", "light-oil", "heavy-oil", "water" }
+CONST.PLASTIC_BASE_RECIPES =
+{
+	"coal" = true,
+	"sulfur" = true,
+	"petroleum-gas" = true,
+	"light-oil" = true,
+	"heavy-oil" = true,
+	"water" = true
+}
+CONST.FLUID_NAMES = 
+{
+	"sulfuric-acid" = true,
+	"petroleum-gas" = true,
+	"light-oil" = true,
+	"heavy-oil" = true,
+	"water" = true
+}
 
 CONST.RECIPE_VARIANT_OVERRIDE = {
 	"electronic-circuit" = settings.startup["greencircuit-asif-recipe-variant"].value,

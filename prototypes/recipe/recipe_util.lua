@@ -1,6 +1,6 @@
 local CONST = require("prototypes.constants")
 local RECIPE_UTIL = {}
-RECIPE_UTIL.item = {}
+
 -- Format the various result structures to: { normal={{name=res1, amount=amnt1}...{name=resN, amount=amntN}},
 --                                            expensive={{name=res1, amount=amnt1}...{name=resN, amount=amntN}}
 --                                           }
@@ -42,7 +42,8 @@ local function format_result(recipe, name)
     return res
 end
 -- Format the various ingredient structures to: { normal={{name=res1, amount=amnt1}...{name=resN, amount=amntN}},
---                                                expensive={{name=res1, amount=amnt1}...{name=resN, amount=amntN}}                                          
+--                                                expensive={{name=res1, amount=amnt1}...{name=resN, amount=amntN}}
+--                                              }                                          
 local function format_ingredients(recipe)
     local ing = {}
     if recipe.normal then
@@ -69,6 +70,8 @@ local function format_ingredients(recipe)
     end
     return ing
 end
+-- Create map of items to their recipes
+RECIPE_UTIL.item = {}
 local recipe_dump = data.raw["recipe"]
 for i,rec in pairs(recipe_dump) do
     -- Get products of recipe
@@ -84,15 +87,34 @@ for i,rec in pairs(recipe_dump) do
         end
     end
 end
-log("ItemToRecipeMap:")
-log(serpent.block(RECIPE_UTIL.item))
+-- Add new item to list, or add amount to existing item
+function merge_or_append(list, ingredient)
+    if list[ingredient.name] then
+        list[ingredient.name].amount = list[ingredient.name].amount + ingredient.amount
+    else
+        list[ingredient.name] = ingredient
+    end
+
+end
+
+-- Main function, recurses through the ingredients of a given recipe, adding base ingredients to a list that *should* make it back up to the top of the stack
 function RECIPE_UTIL.get_ingredient_list(recipe, list, recipe_mode)
     -- get ingredients of recipe
     local ingredients = format_ingredients(recipe)
     for i,ingredient in pairs(ingredients[recipe_mode]) do
         -- If ingredient is a base item, add it to the list.
         -- Else, we need to go deeper
-        if CONST.
+        if CONST.BASE_ITEMS[ingredient.name] then
+            merge_or_append(list, ingredient)
+        else
+            -- Get a (random?) recipe/its variant override for the ingredient
+            local next_recipe_name = CONST.RECIPE_VARIANT_OVERRIDE[ingredient.name] or RECIPE_UTIL.item[ingredient.name].product_of[1] or nil
+            if next_recipe_name then
+                next_recipe = data.raw["recipe"][next_recipe_name]
+                -- Pass list down
+                RECIPE_UTIL.get_ingredient_list(next_recipe, list, recipe_mode)
+            end
+        end
     end
 end
 return RECIPE_UTIL
