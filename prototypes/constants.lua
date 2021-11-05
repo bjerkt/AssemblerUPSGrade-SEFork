@@ -1,12 +1,36 @@
-DEBUG = false
+local CONST = {}
+CONST.DEBUG = false
+CONST.assembler_block = {}
+-- Total speed of 1 assembler block
+CONST.assembler_block.speed = 2.25*8
+-- Total productivity of 1 assembler block
+CONST.assembler_block.productivity = 0.32
+-- Total pollution of 1 assembler block
+CONST.assembler_block.pollution = 24.27*8
+-- Total power consumption of 1 assembler block (in kW)
+-- All 8 assemblers + beacon + 16 stack inserters
+CONST.assembler_block.power_drain = (2792.5*8)+200+(133*16)
+-- Footprint of 1 assembler block (in square meters)
+CONST.assembler_block.area = 12*13
+-- Ingredients list of 1 assembler block
+CONST.assembler_block.ingredients = {
+	{name="assembling-machine-3", amount=8},
+	{name="beacon", amount=1},
+	{name="stack-inserter", amount=16},
+	{name="productivity-module-3", amount=32},
+	{name="speed-module-3", amount=8},
+	{name="express-transport-belt", amount=31},
+	{name="express-underground-belt", amount=2}
+}
+
 
 --Number of beacons around a standard building.
-beacon_count = 12
+CONST.beacon_count = 12
 
-NEED_FLUID_RECIPES = { "bc-asif", "se-bc-asif", "spd-3-asif", "prod-3-asif", "pla-asif", "rf-asif", "sfpg-asif", "sflo-asif", "sfho-asif", "rcu-asif", "arty-shell-asif" }
-MAX_FLUID_PER_INPUT_PER_SECOND = settings.startup["max-flow-rate"].value
+CONST.NEED_FLUID_RECIPES = { "bc-asif", "se-bc-asif", "spd-3-asif", "prod-3-asif", "pla-asif", "rf-asif", "sfpg-asif", "sflo-asif", "sfho-asif", "rcu-asif", "arty-shell-asif" }
+CONST.MAX_FLUID_PER_INPUT_PER_SECOND = settings.startup["max-flow-rate"].value
 
-TECH_DETAILS = {
+CONST.TECH_DETAILS = {
 	["arty-shell-asif"] = { cost = 750000, prereqs = {"gc-asif", "pla-asif"} },
 	["gc-asif"] = { cost = 250000, prereqs = {"asif"} },
 	["rc-asif"] = { cost = 500000, prereqs = {"gc-asif"} },
@@ -29,7 +53,7 @@ TECH_DETAILS = {
 	["oil-asif"] = { cost = 4000000, prereqs = {"asif"} },
 }
 -- Names of the desired recipes for each item. Important distinction, as there are multiple recipes for certain items
-ITEM_LIST = {
+CONST.ITEM_LIST = {
 	["arty-shell-asif"] = "artillery-shell",
 	["gc-asif"] = "electronic-circuit-stone",
 	["rc-asif"] = "advanced-circuit",
@@ -51,12 +75,12 @@ ITEM_LIST = {
 	--["eff-3-asif"] = "effectivity-module-3",
 	--["beacon-asif"] = "beacon",
 }
-RECIPE_MAP = {
+CONST.RECIPE_MAP = {
 	["hc-asif"] = "heavy-oil-cracking",
 	["lc-asif"] = "light-oil-cracking",
 }
 -- Root ingredients; we don't need to recurse past these
-base_recipes = 
+CONST.BASE_ITEMS = 
 {
 	"copper-plate",
 	"iron-plate",
@@ -72,6 +96,7 @@ base_recipes =
 	"water",
 	"wood",
 	"stone",
+	"stone-brick",
 	"glass",
 	"sand",
 	"se-vitamelange-extract",
@@ -83,10 +108,10 @@ base_recipes =
 	"se-vulcanite-block"
 
 }
-plastic_base_recipes = {"coal", "sulfur", "petroleum-gas", "light-oil", "heavy-oil", "water" }
-FLUID_NAMES = {"sulfuric-acid", "petroleum-gas", "light-oil", "heavy-oil", "water" }
+CONST.PLASTIC_BASE_RECIPES = {"coal", "sulfur", "petroleum-gas", "light-oil", "heavy-oil", "water" }
+CONST.FLUID_NAMES = {"sulfuric-acid", "petroleum-gas", "light-oil", "heavy-oil", "water" }
 
-RECIPE_VARIANT_OVERRIDE = {
+CONST.RECIPE_VARIANT_OVERRIDE = {
 	"electronic-circuit" = settings.startup["greencircuit-asif-recipe-variant"].value,
 	"processing-unit" = settings.startup["bluecircuit-asif-recipe-variant"].value,
 	"low-density-structure" = settings.startup["lowdensitystructure-asif-recipe-variant"].value,
@@ -95,7 +120,7 @@ RECIPE_VARIANT_OVERRIDE = {
 }
 
 --replicate changes here to control.lua!
-ORDER_MAP = {
+CONST.ORDER_MAP = {
 	["gc-asif"] = "a",
 	["rc-asif"] = "b",
 	["bc-asif"] = "c",
@@ -207,7 +232,7 @@ oil_total_pwr_draw = oil_base_pwr_use * oil_per_unit_pwr_drain_penalty
 --Color, tint, and graphics section
 --///
 
-GRAPHICS_MAP = {
+CONST.GRAPHICS_MAP = {
 	["gc-asif"] = {icon = "gc-asif.png", tint = {r= .2, g = .6, b = .01, a = 1}},
 	["rc-asif"] = {icon = "rc-asif.png", tint = {r= .78, g = .01, b = .01, a = 1}},
 	["bc-asif"] = {icon = "bc-asif.png", tint = {r= .2, g = .13, b = .72, a = 1}},
@@ -233,4 +258,5 @@ GRAPHICS_MAP = {
 	["beacon-asif"] = {icon = "beacon-asif.png", tint = {r= 156, g = 99, b = 66, a = 255}},
 }
 
-recipe_tint = {r= 1, g = .533, b = 0, a = 1}
+CONST.RECIPE_TINT = {r= 1, g = .533, b = 0, a = 1}
+return CONST

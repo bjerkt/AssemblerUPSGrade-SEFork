@@ -1,7 +1,7 @@
-local REC_UTIL = {}
-REC_UTIL.item = {}
--- Format the various result structures to: {{name=res1, amount=amnt1}...{name=resN, amount=amntN}}
---                                      or: { normal={{name=res1, amount=amnt1}...{name=resN, amount=amntN}},
+local CONST = require("prototypes.constants")
+local RECIPE_UTIL = {}
+RECIPE_UTIL.item = {}
+-- Format the various result structures to: { normal={{name=res1, amount=amnt1}...{name=resN, amount=amntN}},
 --                                            expensive={{name=res1, amount=amnt1}...{name=resN, amount=amntN}}
 --                                           }
 local function format_result(recipe, name)
@@ -17,6 +17,8 @@ local function format_result(recipe, name)
         table.insert(res, {})
         res[1].name = recipe.result
         res[1].amount = recipe.result_count or 1
+        local tmp = {normal=table.deepcopy(res), expensive=table.deepcopy(res)}
+        res = tmp
     elseif recipe.results then
         for i,result in pairs(recipe.results) do
             table.insert(res, i, {})
@@ -34,8 +36,38 @@ local function format_result(recipe, name)
                 res[i].amount = result[2]
             end
         end
+        local tmp = {normal=table.deepcopy(res), expensive=table.deepcopy(res)}
+        res = tmp
     end
     return res
+end
+-- Format the various ingredient structures to: { normal={{name=res1, amount=amnt1}...{name=resN, amount=amntN}},
+--                                                expensive={{name=res1, amount=amnt1}...{name=resN, amount=amntN}}                                          
+local function format_ingredients(recipe)
+    local ing = {}
+    if recipe.normal then
+        ing.normal = format_ingredients(recipe.normal)
+    end
+    if recipe.expensive then
+        ing.expensive = format_ingredients(recipe.expensive)
+    end
+    if recipe.ingredients then
+        for i,ingredient in pairs(recipe.ingredients) do
+            table.insert(ing, i, {})
+            -- Using named keys, {name=foo, amount=1} is enforced
+            if ingredient.name then
+                ing[i].name = ingredient.name
+                ing[i].amount = ingredient.amount
+            -- Using numbered keys, {name, amount} is enforced
+            else 
+                ing[i].name = ingredient[1]
+                ing[i].amount = ingredient[2]
+            end
+        end
+        local tmp = {normal=table.deepcopy(ing), expensive=table.deepcopy(ing)}
+        ing = tmp
+    end
+    return ing
 end
 local recipe_dump = data.raw["recipe"]
 for i,rec in pairs(recipe_dump) do
@@ -45,15 +77,22 @@ for i,rec in pairs(recipe_dump) do
     if res.normal then res = res.normal end
     for j,item in pairs(res) do
         -- Add recipe to product_of for item
-        if not REC_UTIL.item[item.name] then
-            REC_UTIL.item[item.name] = {product_of={rec.name}}
+        if not RECIPE_UTIL.item[item.name] then
+            RECIPE_UTIL.item[item.name] = {product_of={rec.name}}
         else 
-            table.insert(REC_UTIL.item[item.name].product_of, rec.name)
+            table.insert(RECIPE_UTIL.item[item.name].product_of, rec.name)
         end
     end
 end
 log("ItemToRecipeMap:")
-log(serpent.block(REC_UTIL.item))
-function REC_UTIL.recurse_ingredient_chain(recipe)
+log(serpent.block(RECIPE_UTIL.item))
+function RECIPE_UTIL.get_ingredient_list(recipe, list, recipe_mode)
+    -- get ingredients of recipe
+    local ingredients = format_ingredients(recipe)
+    for i,ingredient in pairs(ingredients[recipe_mode]) do
+        -- If ingredient is a base item, add it to the list.
+        -- Else, we need to go deeper
+        if CONST.
+    end
 end
-return REC_UTIL
+return RECIPE_UTIL
