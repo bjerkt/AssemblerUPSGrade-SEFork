@@ -1,7 +1,8 @@
-require("prototypes.constants")
+--require("prototypes.constants")
 require("prototypes.functions")
+local ITEMS = {}
 
-function createItem(is_chem_plant, new_name)
+function ITEMS.createItem(is_chem_plant, new_name, CONST)
 	local newitem = nil
 	if is_chem_plant then
 		newitem = util.table.deepcopy(data.raw.item["chemical-plant"])
@@ -11,26 +12,26 @@ function createItem(is_chem_plant, new_name)
 	
 	newitem.name = new_name
 	newitem.place_result = new_name
-	newitem.order = ORDER_MAP[new_name]
-	newitem.icon = "__AssemblerUPSGrade-SEFork__/graphics/" .. GRAPHICS_MAP[new_name].icon
+	newitem.order = CONST.ORDER_MAP[new_name]
+	newitem.icon = "__AssemblerUPSGrade-SEFork__/graphics/" .. CONST.GRAPHICS_MAP[new_name].icon
 	newitem.stack_size = 1
 	newitem.icon_mipmaps = 1
 	newitem.subgroup = "asif-buildings"
 	
-	if DEBUG then
+	if CONST.DEBUG then
 		log("Debug createItem: " .. do_dump(newitem))
 	end
 	
-	data:extend({newitem})
+	return newitem
 end
 
-function createOilRefItem(new_name)
+function ITEMS.createOilRefItem(new_name, CONST)
 	local newitem = util.table.deepcopy(data.raw.item["oil-refinery"])
 	
 	newitem.name = new_name
 	newitem.place_result = new_name
-	newitem.order = ORDER_MAP[new_name]
-	newitem.icon = "__AssemblerUPSGrade-SEFork__/graphics/" .. GRAPHICS_MAP[new_name].icon
+	newitem.order = CONST.ORDER_MAP[new_name]
+	newitem.icon = "__AssemblerUPSGrade-SEFork__/graphics/" .. CONST.GRAPHICS_MAP[new_name].icon
 	newitem.stack_size = 1
 	newitem.icon_mipmaps = 1
 	newitem.subgroup = "asif-buildings"
@@ -84,3 +85,4 @@ data:extend({
       type = "item"
     },
 })
+return ITEMS

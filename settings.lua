@@ -170,8 +170,8 @@ data:extend{
     name = "rocketcontrolunit-asif-items-per-second",
     setting_type = "startup",
     minimum_value = 1,
-    maximum_value = 100000,
-    default_value = 1000,
+    maximum_value = 10000,
+    default_value = 100,
     order = "l",
   },
   {

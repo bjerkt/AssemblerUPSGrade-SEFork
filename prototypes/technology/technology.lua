@@ -1,3 +1,4 @@
+local TECH = {}
 data:extend(
 {
 	{
@@ -30,10 +31,9 @@ data:extend(
 		order = "a-b-c"
 	}
 })
-
+--[[
 data:extend(
 {
-	--[[
 	{
 		type = "technology",
 		name = "rf-asif",
@@ -67,20 +67,19 @@ data:extend(
 		},
 		order = "a-b-c"
 	},
-	--]]
 	{
 		type = "technology",
 		name = "oil-asif",
-		icon = "__AssemblerUPSGrade-SEFork__/graphics/" .. GRAPHICS_MAP["oil-asif"].icon,
+		icon = "__AssemblerUPSGrade-SEFork__/graphics/oil-asif.png",
 		icon_size = 64,
 		effects =
 		{
 			{type = "unlock-recipe", recipe = "oil-asif" },
 			{type = "unlock-recipe", recipe = "oil-asif-recipe" },
-			{type = "unlock-recipe", recipe = "lc-asif" },
-			{type = "unlock-recipe", recipe = "lc-asif-recipe" },
-			{type = "unlock-recipe", recipe = "hc-asif" },
-			{type = "unlock-recipe", recipe = "hc-asif-recipe" },
+			{type = "unlock-recipe", recipe = "lightcracking-asif" },
+			{type = "unlock-recipe", recipe = "lightcracking-asif-recipe" },
+			{type = "unlock-recipe", recipe = "heavycracking-asif" },
+			{type = "unlock-recipe", recipe = "heavycracking-asif-recipe" },
 			{type = "unlock-recipe", recipe = "asif-oil-block" },
 		},
 		prerequisites = {"asif"},
@@ -101,45 +100,42 @@ data:extend(
 		order = "a-b-c"
 	}
 })
-
-function addTechnology(name)
-	if DEBUG then
+]]
+function TECH.create_technology(name, CONST)
+	if CONST.DEBUG then
 		log("Debug addTechnology " .. name)
 	end
-	
+	--[[
 	--Handled elsewhere.
-	if name == "rf-asif" or name == "sfpg-asif" or name == "sflo-asif" or name == "sfho-asif" then
+	if name == "rocketfuel-asif" or name == "solidfuel-petroleumgas-asif" or name == "solidfuel-lightoil-asif" or name == "solidfuel-heavyoil-asif" then
 		return
 	end
-
-	data:extend(
-	{
+	]]
+	local tech = {
+		type = "technology",
+		name = name,
+		icon = "__AssemblerUPSGrade-SEFork__/graphics/" .. CONST.GRAPHICS_MAP[name].icon,
+		icon_size = 64,
+		effects =
 		{
-			type = "technology",
-			name = name,
-			icon = "__AssemblerUPSGrade-SEFork__/graphics/" .. GRAPHICS_MAP[name].icon,
-			icon_size = 64,
-			effects =
-			{
-				{type = "unlock-recipe", recipe = name },
-				{type = "unlock-recipe", recipe = name .. "-recipe" },
+			{type = "unlock-recipe", recipe = name },
+			{type = "unlock-recipe", recipe = name .. "-recipe" },
+		},
+		prerequisites = CONST.TECH_DETAILS[name].prereqs,
+		unit = {
+			count = CONST.TECH_DETAILS[name].cost,
+			ingredients = {
+				{"automation-science-pack", 1},
+				{"logistic-science-pack", 1},
+				{"chemical-science-pack", 1},		
+				{"production-science-pack", 1},
+				{"utility-science-pack", 1},
+				{"space-science-pack", 1}	
 			},
-			prerequisites = TECH_DETAILS[name].prereqs,
-			unit =
-			{
-				count = TECH_DETAILS[name].cost,
-				ingredients =
-				{
-					{"automation-science-pack", 1},
-					{"logistic-science-pack", 1},
-					{"chemical-science-pack", 1},		
-					{"production-science-pack", 1},
-					{"utility-science-pack", 1},
-					{"space-science-pack", 1}	
-				},
-				time = 60
-			},
-			order = "a-b-c"
-		}
-	})
+			time = 60
+		},
+		order = "a-b-c"
+	}
+	return tech
 end
+return TECH
