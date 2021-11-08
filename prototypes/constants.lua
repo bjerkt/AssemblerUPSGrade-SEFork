@@ -189,7 +189,7 @@ beacon_pwr_penalty = spd_module_pwr_penality * CONST.beacon_count
 total_beacon_speed_bonus = spd_module_speed_bonus * CONST.beacon_count
 
 --//Assembler (refers to vanilla object)
-CONST.base_assembler_entity = data.raw["assembling-machine"]["assembling-machine-3"]
+CONST.base_assembler_entity = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-3"])
 CONST.base_assembler_entity.crafting_speed = 1
 CONST.base_assembler_entity.crafting_categories = { "asif-crafting" }
 CONST.base_assembler_entity.allowed_effects = nil
