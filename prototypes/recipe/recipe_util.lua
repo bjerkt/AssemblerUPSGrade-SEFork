@@ -23,8 +23,9 @@ local function parse_result(recipe_core)
         for i,result in pairs(recipe_core.results) do
             local tmp = {}
             if result.name then
-                -- Using named keys, {name, amount/(amount_min,amount_max)} is enforced
+                -- Using named keys, {name, amount/(amount_min,amount_max), ?type} is enforced
                 tmp.name = result.name
+                tmp.type = result.type or "item"
                 if result.amount then
                     tmp.amount = result.amount
                 elseif result.amount_min then
@@ -32,8 +33,11 @@ local function parse_result(recipe_core)
                 end
             else
                 -- Using numbered keys, {name, amount} is enforced
+                -- From Wiki: "For fluids, the full format always has to be used"
+                -- Therefore, this is always an item
                 tmp.name = result[1]
                 tmp.amount = result[2]
+                tmp.type = "item"
             end
             -- If item already exists, then add new amount to existing amount
             if res[tmp.name] then
@@ -120,16 +124,21 @@ end
 -- Create map of items to their recipes
 RECIPE_UTIL.item = {}
 local recipe_dump = data.raw["recipe"]
-for i,rec in pairs(recipe_dump) do
+for _,rec in pairs(recipe_dump) do
     -- Blacklist SE tech card recipes (cause infinite loops)
     if rec.name:match('^se-.+-data$') then goto continue end
     -- Get products of recipe
     local products = format_result(rec)
     -- Only care about names here, not amounts, so ignoring expensive mode should be fine?
-    for j,item in pairs(products.normal) do
+    for _,item in pairs(products.normal) do
         -- Add recipe to product_of for item
         if not RECIPE_UTIL.item[item.name] then
-            RECIPE_UTIL.item[item.name] = {product_of={rec.name}}
+            local item_type = "item"
+            if item.type then item_type = item.type end
+            RECIPE_UTIL.item[item.name] = {
+                product_of={rec.name},
+                type = item_type
+            }
         else 
             table.insert(RECIPE_UTIL.item[item.name].product_of, rec.name)
         end
@@ -137,11 +146,20 @@ for i,rec in pairs(recipe_dump) do
     ::continue::
 end
 -- Add new item to list, or add amount to existing item
-function merge_or_append(list, ingredient)
+-- Clamp amounts to max 65535, as game engine will throw error if using more
+function merge_or_append(list, ingredient, CONST)
     if list[ingredient.name] then
         list[ingredient.name].amount = list[ingredient.name].amount + ingredient.amount
+        if ingredient.name ~= "energy_required" and list[ingredient.name].amount > 65535 then
+            if CONST.DEBUG then log("Ingredient "..ingredient.name.." exceeded limit with amount of "..list[ingredient.name].amount) end
+            list[ingredient.name].amount = 65535 
+        end
     else
         list[ingredient.name] = ingredient
+        if ingredient.name ~= "energy_required" and list[ingredient.name].amount > 65535 then
+            if CONST.DEBUG then log("Ingredient "..ingredient.name.." exceeded limit with amount of "..list[ingredient.name].amount) end
+            list[ingredient.name].amount = 65535 
+        end
     end
     --return list
 end
@@ -156,8 +174,10 @@ function RECIPE_UTIL.get_ingredient_list(recipe, list, recipe_mode, result_name_
     local craft_multiplier = math.floor(result_amount_desired/(results[recipe_mode][result_name_desired].amount))
     if craft_multiplier == 0 then craft_multiplier = 1 end
     -- Add energy needed to running total
-    merge_or_append(list, {name="energy_required", amount=craft_multiplier*ingredients[recipe_mode].energy_required})
+    merge_or_append(list, {name="energy_required", amount=craft_multiplier*ingredients[recipe_mode].energy_required}, CONST)
     for i,ingredient in pairs(ingredients[recipe_mode].ingredients) do
+        -- Set type (defaults to item, which is bad when using fluids)
+        ingredient.type = RECIPE_UTIL.item[ingredient.name].type
         -- Scale ingredient by number of crafts we're doing
         ingredient.amount = craft_multiplier*ingredient.amount
         -- If ingredient is a base item, add it to the list.
@@ -212,8 +232,6 @@ function RECIPE_UTIL.create_asif_working_recipe(recipe_prefix, result_item, resu
             table.insert(stripped_ingredients[recipe_mode], ingredient)
         end
     end
-    log("setting normal.ingredients to:")
-    log(serpent.block(stripped_ingredients["normal"]))
     local recipe = {
         type = "recipe",
         category = "asif-crafting",
