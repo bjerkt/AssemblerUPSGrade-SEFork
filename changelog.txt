@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.0
+  Changes:
+    - Lots of code refactoring and prototype renaming.
+---------------------------------------------------------------------------------------------------
 Version: 0.1.2
   Changes:
     - Marked as incompatible with Krastorio 2, pending fix.
