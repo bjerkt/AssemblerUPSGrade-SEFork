@@ -204,6 +204,7 @@ function RECIPE_UTIL.create_assembler_entity_recipe(name, number_assembler_block
         type = "recipe",
         name = name,
         category = "advanced-crafting",
+        enabled = false,
         normal = {
             ingredients = {
                 {name = "asif-assembler-block", amount = number_assembler_blocks["normal"]}
@@ -236,6 +237,7 @@ function RECIPE_UTIL.create_asif_working_recipe(recipe_prefix, result_item, resu
         type = "recipe",
         category = "asif-crafting",
         name = recipe_prefix.."-recipe",
+        enabled = false,
         normal = {
             ingredients = ingredient_list["normal"],
             results = {{name = result_item, amount = result_amount}}
