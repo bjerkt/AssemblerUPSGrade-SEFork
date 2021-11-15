@@ -13,13 +13,15 @@ function ComputePowerDrainAndDraw(count, bld_power)
 	return draw, drain
 end
 
-function updateAssFluidBoxes(new_entity, assemblers, half_side_len, fluid_per_second, CONST)
+function updateAssFluidBoxes(new_entity, number_assembler_blocks, half_side_len, fluid_per_second, CONST)
 	for i,res in pairs(new_entity.fluid_boxes) do
+		-- Skip if fluid box is not a table
+		-- Using the table library object rather than a string. Huh?
 		if type(res) ~= type(table) then
 			goto continue
 		end
-		
 		--Ensure negative values get more negative and pos values get more pos
+		-- Only messing with y here, since x should be 0 (in the middle of the entity)
 		--new_entity.fluid_boxes[i].secondary_draw_orders = nil
 		if new_entity.fluid_boxes[i].pipe_connections[1].position[2] > 0 then			
 			new_entity.fluid_boxes[i].pipe_connections[1].position[2] = math.ceil(half_side_len)
@@ -32,8 +34,8 @@ function updateAssFluidBoxes(new_entity, assemblers, half_side_len, fluid_per_se
 				new_entity.fluid_boxes[i].pipe_covers[dir].layers[z].shift = {-.5,0}
 				new_entity.fluid_boxes[i].pipe_covers[dir].layers[z].hr_version.shift = {-.5,0}
 			end
-			new_entity.fluid_boxes[i].pipe_picture[dir].scale = assemblers / 1.725
-			new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.scale = assemblers / 1.725
+			new_entity.fluid_boxes[i].pipe_picture[dir].scale = number_assembler_blocks / 1.725
+			new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.scale = number_assembler_blocks / 1.725
 			new_entity.fluid_boxes[i].pipe_picture[dir].shift[1] = new_entity.fluid_boxes[i].pipe_picture[dir].shift[1] + .5
 			new_entity.fluid_boxes[i].pipe_picture[dir].shift[2] = new_entity.fluid_boxes[i].pipe_picture[dir].shift[2] + .5
 			new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.shift[1] = new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.shift[1] + .5
@@ -44,6 +46,10 @@ function updateAssFluidBoxes(new_entity, assemblers, half_side_len, fluid_per_se
 	end
 	
 	--The vanilla entities always have inputs and outputs. We only care about inputs; ASIFs do not produce output fluids.
+	-- Rolling all machines into a square assembler, rather than messing with chem plants & whatnot with their offset fluid boxes
+	-- This means we do need ouput fluid boxes
+
+	--[[
 	if math.ceil(fluid_per_second / CONST.MAX_FLUID_PER_INPUT_PER_SECOND) > table_size(new_entity.fluid_boxes) / 2 then
 		local base_fluidbox = util.table.deepcopy(new_entity.fluid_boxes[1])
 		local num_additonal = math.ceil(fluid_per_second / CONST.MAX_FLUID_PER_INPUT_PER_SECOND) - table_size(new_entity.fluid_boxes) / 2
@@ -67,7 +73,7 @@ function updateAssFluidBoxes(new_entity, assemblers, half_side_len, fluid_per_se
 			::try_next_pipe::
 		end
 	end
-	
+	]]
 	if DEBUG then
 		for idx, box in pairs(new_entity.fluid_boxes) do
 			if type(box) == "table" then
@@ -141,13 +147,12 @@ function ENTITY.create_assembler_entity(name, number_assembler_blocks, CONST)
 		-- }
 	-- }
 
-	
+	--[[
 	if CONST.RECIPE_USES_FLUID[name] then
 		updateAssFluidBoxes(new_entity, number_assembler_blocks, new_drawing_box_size, CONST.MAX_FLUID_PER_INPUT_PER_SECOND, CONST)
 	else
 		new_entity.fluid_boxes = nil
 	end
-	--[[
 		-- Moved to CONST
 	local edge_art = {
 		filename = "__AssemblerUPSGrade-SEFork__/graphics/entity/assembler-border.png",
@@ -188,6 +193,11 @@ function ENTITY.create_assembler_entity(name, number_assembler_blocks, CONST)
 	}
 	table.insert(new_entity.animation.layers, color_mask)
 	SCALE_UTIL.scale_graphics(new_entity, scale_factor*0.88)
+	if CONST.RECIPE_USES_FLUID[name] then
+		SCALE_UTIL.move_assembler_fluid_boxes(new_entity)
+	else
+		new_entity.fluid_boxes = nil
+	end
 
 	if settings.startup["ass-alt-map-color"].value then
 		new_entity.map_color = CONST.GRAPHICS_MAP[name].tint

@@ -69,4 +69,46 @@ function SCALE_UTIL.scale_graphics(entity, scale_factor)
 		end
 	end
 end
+function SCALE_UTIL.move_assembler_fluid_boxes(entity)
+	-- Assembler is square, so use +x from corner of selection box
+	--[[
+		--------------------
+		|	   ^input	   |
+		|<input		output>|
+		|				   |
+		|		\/output   |
+		--------------------
+	]]
+	local dist_from_center = entity.selection_box[2][1] + 0.5
+	entity.fluid_boxes = {
+		{
+			production_type = "input",
+			pipe_covers = pipecoverspictures(),
+			base_area = 10,
+			base_levelv = -1,
+			pipe_connections = {{type="input", position={0,-dist_from_center}}}
+		},
+		{
+			production_type = "input",
+			pipe_covers = pipecoverspictures(),
+			base_area = 10,
+			base_levelv = -1,
+			pipe_connections = {{type="input", position={-dist_from_center,0}}}
+		},
+		{
+			production_type = "output",
+			pipe_covers = pipecoverspictures(),
+			base_area = 10,
+			base_levelv = 1,
+			pipe_connections = {{type="output", position={dist_from_center,0}}}
+		},
+		{
+			production_type = "output",
+			pipe_covers = pipecoverspictures(),
+			base_area = 10,
+			base_levelv = 1,
+			pipe_connections = {{type="output", position={0,dist_from_center}}}
+		}
+	}
+end
 return SCALE_UTIL

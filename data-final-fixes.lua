@@ -52,7 +52,19 @@ for asif_name, target_item in pairs(CONST.ITEM_LIST) do
 		blocks_needed[recipe_mode] = ingredient_list[recipe_mode].energy_required.amount / CONST.assembler_block.speed
 		ingredient_list[recipe_mode].energy_required = nil
 	end
-	-- Final post-process rounding of everything to integers
+	-- Final post-processing
+	-- Check for anything over the amount limit
+	-- Should do some scaling in the future to bump everything back down
+	for _,recipe_mode in pairs({"normal", "expensive"}) do
+		for _,ingredient in pairs(ingredient_list[recipe_mode]) do
+			if ingredient.amount > CONST.MAX_INPUT_AMOUNT then
+				log("Error creating "..asif_name.." - "..ingredient.name.." exceeded amount limit. Current amount: "..ingredient.amount)
+				log("Truncating amount to "..CONST.MAX_INPUT_AMOUNT)
+				ingredient.amount = CONST.MAX_INPUT_AMOUNT
+			end
+		end
+	end
+	-- Round everything to integers
 	for _,recipe_mode in pairs({"normal", "expensive"}) do
 		for _,ingredient in pairs(ingredient_list[recipe_mode]) do
 			ingredient.amount = round(ingredient.amount)

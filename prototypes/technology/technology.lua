@@ -116,6 +116,7 @@ function TECH.create_technology(name, CONST)
 		name = name,
 		icon = "__AssemblerUPSGrade-SEFork__/graphics/" .. CONST.GRAPHICS_MAP[name].icon,
 		icon_size = 64,
+		icon_mipmaps = 1,
 		effects =
 		{
 			{type = "unlock-recipe", recipe = name },
