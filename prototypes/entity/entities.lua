@@ -1,5 +1,7 @@
-require("prototypes.constants")
+--local CONST= require("prototypes.constants")
 require("prototypes.functions")
+local SCALE_UTIL = require("prototypes.scale_util")
+local ENTITY = {}
 
 function ComputePowerDrainAndDraw(count, bld_power)
 	local num_beacons = count * math.ceil(beacon_count * 0.5) + beacon_count
@@ -11,45 +13,46 @@ function ComputePowerDrainAndDraw(count, bld_power)
 	return draw, drain
 end
 
-function updateAssFluidBoxes(new_entity, assemblers, half_side_len, fluid_per_second)
-	for i,res in pairs(new_entity.fluid_boxes)
-	do
-		if type(res) ~= type(table)
-		then
+function updateAssFluidBoxes(new_entity, number_assembler_blocks, half_side_len, fluid_per_second, CONST)
+	for i,res in pairs(new_entity.fluid_boxes) do
+		-- Skip if fluid box is not a table
+		-- Using the table library object rather than a string. Huh?
+		if type(res) ~= type(table) then
 			goto continue
 		end
-		
 		--Ensure negative values get more negative and pos values get more pos
+		-- Only messing with y here, since x should be 0 (in the middle of the entity)
 		--new_entity.fluid_boxes[i].secondary_draw_orders = nil
-		if new_entity.fluid_boxes[i].pipe_connections[1].position[2] > 0
-		then			
+		if new_entity.fluid_boxes[i].pipe_connections[1].position[2] > 0 then			
 			new_entity.fluid_boxes[i].pipe_connections[1].position[2] = math.ceil(half_side_len)
 		else
 			new_entity.fluid_boxes[i].pipe_connections[1].position[2] = math.floor(-1*half_side_len)
 		end
-		
-		-- for _,dir in pairs({"north", "east", "south", "west"})
-		-- do
-			-- for z,_ in pairs(new_entity.fluid_boxes[i].pipe_covers[dir].layers)
-			-- do
-				-- new_entity.fluid_boxes[i].pipe_covers[dir].layers[z].shift = {-.5,0}
-				-- new_entity.fluid_boxes[i].pipe_covers[dir].layers[z].hr_version.shift = {-.5,0}
-			-- end
-
-			-- new_entity.fluid_boxes[i].pipe_picture[dir].scale = assemblers / 1.725
-			-- new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.scale = assemblers / 1.725
-			-- new_entity.fluid_boxes[i].pipe_picture[dir].shift[1] = new_entity.fluid_boxes[i].pipe_picture[dir].shift[1] + .5
-			-- new_entity.fluid_boxes[i].pipe_picture[dir].shift[2] = new_entity.fluid_boxes[i].pipe_picture[dir].shift[2] + .5
-			-- new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.shift[1] = new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.shift[1] + .5
-			-- new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.shift[2] = new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.shift[2] + .5
-		-- end
+		--[[
+		for _,dir in pairs({"north", "east", "south", "west"}) do
+			for z,_ in pairs(new_entity.fluid_boxes[i].pipe_covers[dir].layers) do
+				new_entity.fluid_boxes[i].pipe_covers[dir].layers[z].shift = {-.5,0}
+				new_entity.fluid_boxes[i].pipe_covers[dir].layers[z].hr_version.shift = {-.5,0}
+			end
+			new_entity.fluid_boxes[i].pipe_picture[dir].scale = number_assembler_blocks / 1.725
+			new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.scale = number_assembler_blocks / 1.725
+			new_entity.fluid_boxes[i].pipe_picture[dir].shift[1] = new_entity.fluid_boxes[i].pipe_picture[dir].shift[1] + .5
+			new_entity.fluid_boxes[i].pipe_picture[dir].shift[2] = new_entity.fluid_boxes[i].pipe_picture[dir].shift[2] + .5
+			new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.shift[1] = new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.shift[1] + .5
+			new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.shift[2] = new_entity.fluid_boxes[i].pipe_picture[dir].hr_version.shift[2] + .5
+		end
+		--]]
 		::continue::
 	end
 	
 	--The vanilla entities always have inputs and outputs. We only care about inputs; ASIFs do not produce output fluids.
-	if math.ceil(fluid_per_second / MAX_FLUID_PER_INPUT_PER_SECOND) > table_size(new_entity.fluid_boxes) / 2 then
+	-- Rolling all machines into a square assembler, rather than messing with chem plants & whatnot with their offset fluid boxes
+	-- This means we do need ouput fluid boxes
+
+	--[[
+	if math.ceil(fluid_per_second / CONST.MAX_FLUID_PER_INPUT_PER_SECOND) > table_size(new_entity.fluid_boxes) / 2 then
 		local base_fluidbox = util.table.deepcopy(new_entity.fluid_boxes[1])
-		local num_additonal = math.ceil(fluid_per_second / MAX_FLUID_PER_INPUT_PER_SECOND) - table_size(new_entity.fluid_boxes) / 2
+		local num_additonal = math.ceil(fluid_per_second / CONST.MAX_FLUID_PER_INPUT_PER_SECOND) - table_size(new_entity.fluid_boxes) / 2
 		
 		for i=0, num_additonal, 1 do
 			base_fluidbox.base_level = -1
@@ -70,7 +73,7 @@ function updateAssFluidBoxes(new_entity, assemblers, half_side_len, fluid_per_se
 			::try_next_pipe::
 		end
 	end
-	
+	]]
 	if DEBUG then
 		for idx, box in pairs(new_entity.fluid_boxes) do
 			if type(box) == "table" then
@@ -80,40 +83,31 @@ function updateAssFluidBoxes(new_entity, assemblers, half_side_len, fluid_per_se
 	end
 end
 
-function createAssemblerEntity(name, compression_ratio, n_ass, e_ass, fluid_per_second)
-	if DEBUG then
+function ENTITY.create_assembler_entity(name, number_assembler_blocks, CONST)
+	if CONST.DEBUG then
 		log("Debug: createAssemblerEntity " .. name)
 	end
-	
+	--[[
 	--modify here if you wish to create separate entities for normal/expensive mode.
-	local draw, drain = ComputePowerDrainAndDraw(n_ass, assembler_total_pwr_draw_prod)
-		
+	local draw, drain = ComputePowerDrainAndDraw(number_assembler_blocks, assembler_total_pwr_draw_prod)
 	--Pollution
 	--modify here if you wish to create separate entities for normal/expensive mode.
-	local total_pollution_value = assembler_base_pollution * (assembler_per_unit_pwr_drain_penalty_prod * (prod_mod_pollution_penalty * assembler_base_modules + 1)) * n_ass
-	
-	local new_entity = util.table.deepcopy(base_ass_entity)
-	
+	local total_pollution_value = CONST.assembler_block.pollution * number_assembler_blocks
+	]]
+	local new_entity = util.table.deepcopy(CONST.base_assembler_entity)
 	new_entity.fixed_recipe = name .. "-recipe"
 	new_entity.name = name
-	new_entity.crafting_speed = 1
-	new_entity.crafting_categories = { "asif-crafting" }
-	new_entity.energy_source.emissions_per_minute = total_pollution_value
-	new_entity.energy_source.drain = drain .. "kW"
-	new_entity.energy_usage = draw .. "kW"
-	new_entity.allowed_effects = nil
-	new_entity.module_specification.module_slots = 0
-	new_entity.scale_entity_info_icon = true
-	--new_entity.base_productivity = .1*assembler_base_modules
+	new_entity.energy_source.emissions_per_minute = CONST.assembler_block.pollution * number_assembler_blocks
+	new_entity.energy_source.drain = CONST.assembler_block.energy_usage*number_assembler_blocks/30 .. "kW"
+	new_entity.energy_usage = CONST.assembler_block.energy_usage*number_assembler_blocks .. "kW"
 	new_entity.fast_replaceable_group = name
 	new_entity.minable.result = name
-	new_entity.ingredient_count = 255
-	
+
 	local new_drawing_box_size = 0
-	local scale_factor = 0
+	local scale_factor = 1
 	
 	--params: bld size, beacons on one side per bld, compression ratio
-	new_drawing_box_size, scale_factor = getScaleFactors(3, 4, n_ass)
+	new_drawing_box_size, scale_factor = getScaleFactors(3, 4, number_assembler_blocks)
 	
 	local new_collison_size = new_drawing_box_size - 0.3
 	
@@ -125,26 +119,26 @@ function createAssemblerEntity(name, compression_ratio, n_ass, e_ass, fluid_per_
 		scale_factor = override_size / 3 / 1.875
 	end
 
-	local scale_adjust = 1.05
+	local scale_adjust = 1--.05
 	new_entity.alert_icon_shift[1] = new_entity.alert_icon_shift[1] * scale_factor
 	new_entity.alert_icon_shift[2] = new_entity.alert_icon_shift[2] * scale_factor
 	new_entity.alert_icon_scale = scale_factor
+	new_entity.icon = "__AssemblerUPSGrade-SEFork__/graphics/" .. CONST.GRAPHICS_MAP[name].icon
+	--[[
+		-- Moved to scale_util
 	for i,_ in pairs(new_entity.animation.layers)
 	do
 		new_entity.animation.layers[i].scale = scale_factor * scale_adjust
 		new_entity.animation.layers[i].hr_version.scale = scale_factor * scale_adjust
-		
 		if new_entity.animation.layers[i].hr_version.filename == "__base__/graphics/entity/assembling-machine-3/hr-assembling-machine-3.png" then
 			new_entity.animation.layers[i].hr_version.filename = "__AssemblerUPSGrade-SEFork__/graphics/entity/assembler-model.png"
 		end
-
 	end
-	
+	]]
 	new_entity.collision_box = { {-1*new_collison_size, -1*new_collison_size}, {new_collison_size,new_collison_size} }
 	new_entity.drawing_box = { {-1*new_drawing_box_size, -1*(new_drawing_box_size)}, {new_drawing_box_size,new_drawing_box_size} }
 	new_entity.selection_box = { {-1*new_drawing_box_size, -1*new_drawing_box_size}, {new_drawing_box_size,new_drawing_box_size} }
 	
-	new_entity.icon = "__AssemblerUPSGrade-SEFork__/graphics/" .. GRAPHICS_MAP[name].icon
 	-- new_entity.icons = {
 		-- {
 			-- icon = "__AssemblerUPSGrade-SEFork__/graphics/" .. GRAPHICS_MAP[name].icon,
@@ -152,15 +146,14 @@ function createAssemblerEntity(name, compression_ratio, n_ass, e_ass, fluid_per_
 			-- tint = GRAPHICS_MAP[name].tint
 		-- }
 	-- }
-	new_entity.icon_size = 64
-	
-	if has_value(NEED_FLUID_RECIPES, name)
-	then
-		updateAssFluidBoxes(new_entity, n_ass, new_drawing_box_size, fluid_per_second)
+
+	--[[
+	if CONST.RECIPE_USES_FLUID[name] then
+		updateAssFluidBoxes(new_entity, number_assembler_blocks, new_drawing_box_size, CONST.MAX_FLUID_PER_INPUT_PER_SECOND, CONST)
 	else
 		new_entity.fluid_boxes = nil
 	end
-	
+		-- Moved to CONST
 	local edge_art = {
 		filename = "__AssemblerUPSGrade-SEFork__/graphics/entity/assembler-border.png",
 		frame_count = new_entity.animation.layers[1].frame_count,
@@ -171,27 +164,45 @@ function createAssemblerEntity(name, compression_ratio, n_ass, e_ass, fluid_per_
 		width = 256,
 	}
 	table.insert(new_entity.animation.layers, edge_art)
-	
+	]]
 	local color_mask = {
 		filename = "__AssemblerUPSGrade-SEFork__/graphics/entity/ass-mach-tint_mask.png",
 		frame_count = new_entity.animation.layers[1].frame_count,
 		line_length = new_entity.animation.layers[1].line_length,
 		height = 237,
 		priority = "high",
-		scale = scale_factor * scale_adjust,
+		scale = scale_adjust,
 		width = 214,
-		tint = GRAPHICS_MAP[name].tint,
+		tint = CONST.GRAPHICS_MAP[name].tint,
 		flags = {"mask"},
 		apply_runtime_tint = true,
-		shift = new_entity.animation.layers[1].hr_version.shift
+		shift = new_entity.animation.layers[1].hr_version.shift,
+		hr_version = {
+			filename = "__AssemblerUPSGrade-SEFork__/graphics/entity/uhr/ass-mach-tint_mask.png",
+			frame_count = new_entity.animation.layers[1].frame_count,
+			line_length = new_entity.animation.layers[1].line_length,
+			height = 237*4,
+			priority = "high",
+			scale = scale_adjust/4,
+			width = 214*4,
+			tint = CONST.GRAPHICS_MAP[name].tint,
+			flags = {"mask"},
+			apply_runtime_tint = true,
+			shift = new_entity.animation.layers[1].hr_version.shift
+		}
 	}
 	table.insert(new_entity.animation.layers, color_mask)
-	
-	if settings.startup["ass-alt-map-color"].value then
-		new_entity.map_color = GRAPHICS_MAP[name].tint
+	SCALE_UTIL.scale_graphics(new_entity, scale_factor*0.88)
+	if CONST.RECIPE_USES_FLUID[name] then
+		SCALE_UTIL.move_assembler_fluid_boxes(new_entity)
+	else
+		new_entity.fluid_boxes = nil
 	end
-	
-	if DEBUG then
+
+	if settings.startup["ass-alt-map-color"].value then
+		new_entity.map_color = CONST.GRAPHICS_MAP[name].tint
+	end
+	if CONST.DEBUG then
 		log("Debug createAssemblerEntity : " .. do_dump(new_entity))
 	end
 	
@@ -316,7 +327,7 @@ function createChemFluidBoxes(entity, fluid_per_second, side_length)
 	end
 end
 
-function createChemPlantEntity(name, compression_ratio, n_chem, e_chem, fluid_per_second)
+function ENTITY.createChemPlantEntity(name, compression_ratio, n_chem, e_chem, fluid_per_second)
 	--Pollution
 	--modify here if you wish to create separate entities for normal/expensive mode.
 	local total_pollution_value = chem_base_pollution * (chem_per_unit_pwr_drain_penalty * (prod_mod_pollution_penalty * chem_base_modules + 1)) * n_chem
@@ -466,3 +477,4 @@ function createChemPlantEntity(name, compression_ratio, n_chem, e_chem, fluid_pe
 	
 	data:extend({new_entity})
 end
+return ENTITY

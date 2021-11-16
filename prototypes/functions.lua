@@ -1,4 +1,4 @@
-require("prototypes.constants")
+local CONST = require("prototypes.constants")
 
 --///////
 --I know it might be nice to have all the functions in this file, but I'd rather have functions specific to just one area
