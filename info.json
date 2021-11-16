@@ -8,11 +8,8 @@
 "dependencies": [
 	"base >= 0.17",
 	"space-exploration >= 0.5.77",
-	"?NuclearRebalance >= 1.0.0",
-	"?EnhancedGridEnergyStores >= 1.0.2",
-	"?GatlingPulseLaser >= 1.0.0",
 	"! AssemblerUPSGrade",
 	"! Krastorio2"
 	],
-"description":"Space Exploration friendly version. Provides Application Specific factories to reduce the entity count on megabase maps. Compression ratio is configurable. IE: you can decide to have each building be equivilant to 25 assemblers, or 1000. The recipes/costs/results/size/pollution will all scale accordingly."
+"description":"Space Exploration friendly version. Provides Application Specific Integrated Factories to reduce the entity count on megabase maps. Desired output rate is configurable. IE: you can decide to have each building output 10 items per second, or 1000. The recipes/costs/results/size/pollution will all scale accordingly."
 }
